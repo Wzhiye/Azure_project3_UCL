@@ -1,67 +1,78 @@
-name: Azure Pipelines
+name: Azure Pipeline
+
 variables:
-  python.version: '3.7.6'
+  - group: azsecret
+
+    #vmImageName: 'ubuntu-latest'
+
+
 stages:
-- stage: Build
-  jobs:
-  - job: Build
-    pool:
-      name: Hosted Ubuntu 1604
-    steps:
-    # Needed for Terraform VM deployment
-    # - task: InstallSSHKey@0
-    #   inputs:
-    #     knownHostsEntry: 'KNOWN_HOSTS_STRING'
-    #     sshPublicKey: 'PUBLIC_KEY'
-    #     sshKeySecureFile: 'id_rsa'
-    - task: ArchiveFiles@2
-      displayName: 'Archive FakeRestAPI'
-      inputs:
-        rootFolderOrFile: 'path/to/fakerestapi'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip'
-    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip
-      displayName: 'Upload Package'
-      artifact: drop-fakerestapi
-- stage:
-  jobs:
-  - deployment: FakeRestAPI
-    pool:
-      vmImage: 'Ubuntu-16.04'
-    environment: 'TEST'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureWebApp@1
-            displayName: 'Deploy Azure Web App'
-            inputs:
-              azureSubscription: ''
-              appName: ''
-              appType: webApp
-              package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
-  # - deployment: VMDeploy
-  #   displayName: NAME
-  #   environment:
-  #     name:  ENVIRONMENT NAME
-  #     resourceType: VirtualMachine
-  #     tags: TAG NAME
-  #   strategy:
-  #     runOnce:
-  #       deploy:
-  #         steps:
-  #         - task: Bash@3
-  #           inputs:
-  #             targetType: 'inline'
-  #             script: |
-  #               #! /bin/bash
-                
-  #               sudo apt-get upgrade -y
-  #               sudo apt-get install python3-pip -y
-  #               sudo apt-get install unzip -y
-  #               sudo apt-get install -y chromium-browser
-  #               pip3 install selenium
-  #               export PATH=$PATH:some/path
-
-
+  - stage: Provision
+    jobs:
+      - job: TerrafromTasks
+        displayName: Terraform Tasks
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+        - task: DownloadSecureFile@1
+          displayName: Download azsecret.conf file
+          name: azsecret
+          inputs:
+            secureFile: 'azsecret.conf'
+        - task: InstallSSHKey@0
+          displayName: Install SSH Key
+          inputs:
+            knownHostsEntry: 'known_hosts'
+            sshPublicKey: '$(public_key)'
+            sshKeySecureFile: 'az_eqr_id_rsa'
+        - task: TerraformInstaller@0
+          displayName: Install Terraform
+          inputs:
+            terraformVersion: '1.2.9'
+        - task: TerraformCLI@0
+          displayName: Terraform Init
+          inputs:
+            command: 'init'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environment/test'
+            commandOptions: '-backend-config=$(azsecret.secureFilePath)'
+            backendType: 'azurerm'
+            backendServiceArm: 'service-connection-azurerm'
+            backendAzureRmResourceGroupName: 'tfstate'
+            backendAzureRmStorageAccountName: 'tfstate25183'
+            backendAzureRmContainerName: 'tfstate'
+            allowTelemetryCollection: true
+          
+        - task: TerraformCLI@0
+          displayName: Terraform Validate
+          inputs:
+            command: 'validate'
+            allowTelemetryCollection: true    
+        
+        - task: AzureCLI@1
+          displayName: Set Environment Variables for Terraform
+          inputs:
+            azureSubscription: service-connection-azurerm
+            scriptLocation: inlineScript
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environment/test'
+            addSpnToEnvironment: true
+            inlineScript: |
+                export ARM_CLIENT_ID=$(client_id)
+                export ARM_CLIENT_SECRET=$(client_secret)
+                export ARM_SUBSCRIPTION_ID=$(subscription_id)
+                export ARM_TENANT_ID=$(tenant_id)
+          
+        - task: TerraformCLI@0
+          displayName: 'Terraform Plan'
+          inputs:        
+              command: 'plan'
+              environmentServiceName: 'service-connection-azurerm'
+              allowTelemetryCollection: true
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environment/test'
+              
+        - task: TerraformCLI@0
+          displayName: Terraform Apply
+          inputs:
+            command: 'apply'
+            environmentServiceName: 'service-connection-azurerm'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environment/test'
+            allowTelemetryCollection: true
