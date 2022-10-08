@@ -38,7 +38,7 @@ stages:
             backendType: 'azurerm'
             backendServiceArm: 'service-connection-azurerm'
             backendAzureRmResourceGroupName: 'tfstate'
-            backendAzureRmStorageAccountName: 'tfstate25183'
+            backendAzureRmStorageAccountName: 'tfstate15610'
             backendAzureRmContainerName: 'tfstate'
             allowTelemetryCollection: true
           
