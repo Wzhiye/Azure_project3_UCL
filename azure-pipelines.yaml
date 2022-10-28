@@ -11,8 +11,7 @@ stages:
     jobs:
       - job: TerrafromTasks
         displayName: Terraform Tasks
-        pool:
-          vmImage: 'ubuntu-latest'
+        pool: myAgent
         steps:
         - task: DownloadSecureFile@1
           displayName: Download azsecret.conf file
