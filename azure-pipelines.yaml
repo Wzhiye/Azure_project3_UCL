@@ -184,6 +184,7 @@ stages:
 
     - job: UITests
       displayName: Selenuim UI Tests
+      pool: myAgent
       steps:
       - task: Bash@3
         displayName: 'Setup VM environment'
