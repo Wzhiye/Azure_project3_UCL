@@ -1,26 +1,26 @@
 # Ensuring Quality Releases Project
-Demonstrating building a CI/CD pipeline with Azure DevOps
 
-### Introduction 
+
+## Introduction 
 In this project, you'll develop and demonstrate your skills in using a variety of industry leading tools, especially Microsoft Azure, to create disposable test environments and run a variety of automated tests with the click of a button. Additionally, you'll monitor and provide insight into your application's behavior, and determine root causes by querying the application’s custom log files.
 
 ![Structure](images/Project_overview.png "Project Overview")
 
-### Project Dependencies
+## Project Dependencies
 - [Terraform](https://www.terraform.io/downloads.html)
 - [JMeter](https://jmeter.apache.org/download_jmeter.cgi)
 - [Postman](https://www.postman.com/downloads/)
 - [Python](https://www.python.org/downloads/)
 - [Selenium](https://sites.google.com/a/chromium.org/chromedriver/getting-started)
 
-### Prerequisites
+## Prerequisites
 - [Azure Account](https://portal.azure.com) 
 - [Azure Command Line Interface](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
 - [Azure DevOps Account](https://dev.azure.com/) 
 
-### Steps 
-1. Download the Project Starter file.
-2. Open it in your preferred code editor (Using VS Code in my case)
+## Steps 
+
+### Azure Configuration
 
 Login to your Azure account 
 
@@ -65,73 +65,50 @@ cd ~/.ssh/
 ssh-keygen -t rsa -b 4096 -f az_eqr_id_rsa
 ```
 
-#### Azure Pipeline
-### Setting up Azure Pipeline 
-You need to install [terrafrom extention](https://marketplace.visualstudio.com/items?itemName=charleszipp.azure-pipelines-tasks-terraform&targetId=154afa9d-764e-46a6-9ba3-5b67286ed76b&utm_source=vstsproduct&utm_medium=ExtHubManageList)
-
-Create a new Service Connection in the Project by going to Project Settings -> Service connections -> New service connection -> Azure Resource Manager -> Service Principal (automatics) -> Choose the subscription -> Fill the data from your azurecreds.conf file -> Name the new service connection to Azure Resource Manager
-
-The next step is to upload our azsecret.conf to Azure Devops as a Secure File, to do this we have to navigate to Pipelines -> Library -> Secure Files -> + Secure File -> Upload File. Now the file should be uploaded.
-
-In order for accessing the VM that Terraform creates we will need to also upload to Secure Files a private key. 
-
-![Azure Config and secure file](images/azureconfg.PNG "Azure config")
-
-We will also need a variables group, we will add the following data in a variable group named azsecret.conf
-
-![Azure pipeline variable](images/variable.PNG "Variable")
-
-### Configuring Pipeline Environment
-
-We need to manually register the Virtual Machine for self-test runner in Pipelines -> Environments -> TEST -> Add resource -> Virtual Machines -> Linux. Then copy the registration script and manually ssh into the virtual machine, paste it on the terminal and run it.
-
-```bash
-mkdir azagent;cd azagent;curl -fkSL -o vstsagent.tar.gz https://vstsagentpackage.azureedge.net/agent/2.210.1/vsts-agent-linux-x64-2.210.1.tar.gz;tar -zxvf vstsagent.tar.gz; if [ -x "$(command -v systemctl)" ]; then ./config.sh --environment --environmentname "TEST" --acceptteeeula --agent $HOSTNAME --url https://dev.azure.com/lawalshakirat66/ --work _work --projectname 'p3_demo' --auth PAT --token xlwqjycl6g5ab32rieorpuwa2ryxmvcp7dzgwri3mdjznz6b7p6a --runasservice; sudo ./svc.sh install; sudo ./svc.sh start; else ./config.sh --environment --environmentname "TEST" --acceptteeeula --agent $HOSTNAME --url https://dev.azure.com/lawalshakirat66/ --work _work --projectname 'p3_demo' --auth PAT --token xlwqjycl6g5ab32rieorpuwa2ryxmvcp7dzgwri3mdjznz6b7p6a; ./run.sh; fi
-```
-![Installing azagent](images/SelfrunnerVM.PNG "azagent")
-
-After a successful Deploy run, it should look something like this:
-
-![Installed azagent](images/installedagent.PNG "installed azagent")
+### Azure Pipeline Building
+#### Azure Pipeline Configuration
 
 
-### Terrafrom apply
+![Installed azagent](images/VM.png "installed azagent")
+
+
+#### Terrafrom apply
 
 ![terraform apply](images/Pipeline_TerraformTasks.png "installed azagent")
 
-### Deployed Webapp
+#### Deployed Webapp
 
-![Terraform deployed webapp](images/deployedwebterraform.PNG " Terraform Deployed webapp")
+![Terraform deployed webapp](images/Pipeline_WebappDeployment.png " Terraform Deployed webapp")
 
-![Deployed webapp](images/deployedwebapp.PNG "Deployed webapp")
+![Deployed webapp](images/WebApp.png "Deployed webapp")
 
-#### Testing 
+### Testing 
 
-### Regression test 
+#### Regression test 
 
-![Regression test](images/regtest.PNG "Reg test")
+![Regression test](images/Regression_tests.png "Reg test")
 
 
-### Validation test 
+#### Validation test 
 
-![Validation test](images/valtest.PNG "Val test")
+![Validation test](images/Validatin_tests.png "Val test")
 
-### Publish Test Results
+#### Publish Test Results
 
-![Reg Result](images/regxml.PNG "Reg result")
+![Val Result](images/Test_plan_results1.png "Val result")
 
-![Val Result](images/valxml.PNG "Val result")
+![Reg Result](images/Test_plan_results2.png "Reg result")
 
-### Selenium Test Result
+#### Selenium Test Result
 
-![Selenium Result](images/seleniumtest.PNG "Selenium Result")
+![Selenium Result](images/Selenuim_UItests.PNG "Selenium Result")
 
 ### Stages in Azure Pipeline 
 
-![Stages](images/stages.PNG "Stages")
+![Stages](images/Test_plan_results1.png "Stages")
 
 
-#### Creating Log Analytics workspace 
+### Creating Log Analytics workspace 
 
 You con create LAW from the portal, once the LAW is created, goto Agents management > Linux server > Log Analytics agent instructions > Download and onboard agent for Linux
 
@@ -141,7 +118,7 @@ SSH into the VM created above (Under test) and install the OSMAgent.
 wget https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/installer/scripts/onboard_agent.sh && sh onboard_agent.sh -w 0ca00083-6708-4862-871d-6ba01ed6f0d8 -s p6HsJnyMJOY3sZRGCyNIkwcQo+UkXL9i8GOrf5wDgzM5JSikM5oY+8k2bfI2uejLsyMu3ra5Y7SlrtiUFX/B2Q== -d opinsights.azure.com
 ```
 
-### Create a new alter for the App Service
+#### Create a new alter for the App Service
 - a) From the [Azure Portal](https://portal.azure.com) go to:<br/>
 `Home > Resource groups > "RESOURCE_GROUP_NAME" > "App Service Name" > Monitoring > Alerts`
 - b) Click on `New alert rule`
@@ -151,21 +128,21 @@ wget https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/inst
 - e) Set the `Threshold value` to e.g. `1`. (You will get altered after two consecutive HTTP 404 errors)
 - f) Click `Done`
 
-### Create a new action group for the App Service
+#### Create a new action group for the App Service
 - a) In the same page, go to the `Actions` section, click `Add action groups` and then `Create action group`
 - b) Give the action group a name e.g. `http404`
 - c) Add an **Action name** e.g. `HTTP 404` and choose `Email/SMS message/Push/Voice` in **Action Type**.
 - d) Provide your email and then click `OK`
 
-![Alert](images/alert.PNG "Alert") 
+![Alert](images/Action_group.png "Alert") 
 
-### Create AppServiceHTTPLogs
+#### Create AppServiceHTTPLogs
 
 Go to the `App service > Diagnostic Settings > + Add Diagnostic Setting.` Tick `AppServiceHTTPLogs` and Send to Log Analytics Workspace created on step above and `Save`.
 
 Go back to the `App service > App Service Logs` . Turn on Detailed `Error Messages` and `Failed Request Tracing` > `Save`. Restart the app service.
 
-### Setting up Log Analytics 
+#### Setting up Log Analytics 
 
 Set up custom logging, in the log analytics workspace go to `Settings > Custom Logs > Add + > Choose File`. Select the file selenium.log > Next > Next. Put in the following paths as type Linux:
 
@@ -175,7 +152,7 @@ Set up custom logging, in the log analytics workspace go to `Settings > Custom L
 
 I called it `selenium_CL`, Tick the box Apply below configuration to my Linux machines.
 
-![CL](images/cl.PNG "CL") 
+![CL](images/Log_Analytics.png "CL") 
 
 
 Go back to Log Analytics workspace and run below query to see Logs 
@@ -187,7 +164,7 @@ AppServiceHTTPLogs
 
 ```
 
-![APPhttps Logs](images/Apphttplogs.PNG "Http logs") 
+![APPhttps Logs](images/WebAPP_logs.png "Http logs") 
 
 
 Go back to the App Service web page and navigate on the links and also generate 404 not found , example:
@@ -200,15 +177,15 @@ https://project3demo-appservice.azurewebsites.net/first page
 After the trigger, check the email configured since an alert message will be received. 
 
 
-![Email](images/email.PNG "Email")
+![Email](images/Alert_email.png "Email")
 
-### URL Used for the project 
+#### URL Used for the project 
  Postman: https://dummy.restapiexample.com/api/v1/create
  Selemium: https://www.saucedemo.com/
  Jmeter: Delpoyed webapp -  http://project3demo-appservice.azurewebsites.net/ (Bringing down soon)
 
 
-### Helpful resources from Microsoft
+#### Helpful resources from Microsoft
 - [Example setup using GitHub](https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/install-ssh-key?view=azure-devops#example-setup-using-github)
 - [Environment - virtual machine resource](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/environments-virtual-machines?view=azure-devops)
 - [Set secret variables](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/variables?tabs=yaml%2Cbatch&view=azure-devops&preserve-view=true#secret-variables)
