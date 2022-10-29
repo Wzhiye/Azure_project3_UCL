@@ -69,8 +69,6 @@ ssh-keygen -t rsa -b 4096 -f az_eqr_id_rsa
 ### Setting up Azure Pipeline 
 You need to install [terrafrom extention](https://marketplace.visualstudio.com/items?itemName=charleszipp.azure-pipelines-tasks-terraform&targetId=154afa9d-764e-46a6-9ba3-5b67286ed76b&utm_source=vstsproduct&utm_medium=ExtHubManageList)
 
-![terraform from market place](images/azurexp.PNG "Market Place")
-
 Create a new Service Connection in the Project by going to Project Settings -> Service connections -> New service connection -> Azure Resource Manager -> Service Principal (automatics) -> Choose the subscription -> Fill the data from your azurecreds.conf file -> Name the new service connection to Azure Resource Manager
 
 The next step is to upload our azsecret.conf to Azure Devops as a Secure File, to do this we have to navigate to Pipelines -> Library -> Secure Files -> + Secure File -> Upload File. Now the file should be uploaded.
@@ -99,7 +97,7 @@ After a successful Deploy run, it should look something like this:
 
 ### Terrafrom apply
 
-![terraform apply](images/terraformapply.PNG "installed azagent")
+![terraform apply](images/Pipeline_TerraformTasks.png "installed azagent")
 
 ### Deployed Webapp
 
