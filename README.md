@@ -1,16 +1,10 @@
 # Ensuring Quality Releases Project
 Demonstrating building a CI/CD pipeline with Azure DevOps
 
-## Status
-
-[![Badge Image](images/badget.PNG)](https://dev.azure.com/lawalshakirat66/project3_demo/_apis/build/status/MIZ-KAS.project3_demo?branchName=main)
-
-
 ### Introduction 
-In this project, Azure DevOps is used to build a CI/CD pipeline that create and deploy in infrastructure using terraform, Azure App service to host a website - FakeRestAPI.
-The automated test runs on a self-hosted test runner, a Linux Virtual machine is deployed to use to deploy the UI test with selenium, Integration test with postman and a stress test with Jmeter.
+In this project, you'll develop and demonstrate your skills in using a variety of industry leading tools, especially Microsoft Azure, to create disposable test environments and run a variety of automated tests with the click of a button. Additionally, you'll monitor and provide insight into your application's behavior, and determine root causes by querying the application’s custom log files.
 
-![Structure](images/structure.PNG "structure")
+![Structure](images/Project overview.PNG "Project Overview")
 
 ### Project Dependencies
 - [Terraform](https://www.terraform.io/downloads.html)
